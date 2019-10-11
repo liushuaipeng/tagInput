@@ -47,11 +47,16 @@ export default {
         tags: [
           { id: 2, name: "地点" },
           { id: 2, name: "地点" },
-          { id: 3, name: "任务" },
           { id: 2, name: "地点" },
+          { id: 3, name: "任务" },
           { id: 2, name: "地点" }
         ]
       };
+    }
+  },
+  watch: {
+    tagInputValue1() {
+      console.log("tagInputValue1", this.tagInputValue1);
     }
   }
 };

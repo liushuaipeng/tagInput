@@ -5,6 +5,7 @@
       type="text"
       v-model="text"
       @click="handleClick"
+      @input="handleInput"
       @select="handleSelect"
       @keydown="handleKeydown"
     />
@@ -53,7 +54,7 @@ export default {
       tagSelectionArr: [],
       // 标签组合以及位置信息
       tags: [],
-      textChangeByTag: true
+      textChangeByInput: false
     };
   },
   methods: {
@@ -70,7 +71,9 @@ export default {
         }
       }
     },
-
+    handleInput(event) {
+      this.textChangeByInput = true;
+    },
     handleClick() {
       let selectionStart = this.getCursortPosition();
       let config = this.isCursorInTags(selectionStart);
@@ -84,9 +87,6 @@ export default {
       let tagName =
         (this.braces ? "{{" : "{") + tag.name + (this.braces ? "}}" : "}");
       let selectionEnd = selectionStart + tagName.length;
-      // 调整光标之后标签位置
-      this.setCursorAfterTags(selectionStart, tagName.length);
-      this.tagSelectionArr.push([selectionStart, selectionEnd]);
       tag.start = selectionStart;
       this.tags.push(tag);
 
@@ -94,7 +94,6 @@ export default {
         this.text.substr(0, selectionStart) +
         tagName +
         this.text.substr(selectionStart);
-      this.textChangeByTag = true;
       // vueDom渲染是异步，所以要在下一个线程设置光标位置
       this.$nextTick(() => {
         this.setCursorPosition(selectionEnd);
@@ -116,21 +115,6 @@ export default {
           }
         }, 0);
       }
-    },
-    // 当在文本中间内容发生时，所有在光标之后的tag自身位置需要调整
-    // pos为光标位置，length为调整位数（数字类型，正负都可）
-    setCursorAfterTags(pos = 0, length = 0) {
-      this.tagSelectionArr.forEach(item => {
-        if (pos <= item[0]) {
-          item[0] = item[0] + length;
-          item[1] = item[1] + length;
-        }
-      });
-      this.tags.forEach(item => {
-        if (pos <= item.start) {
-          item.start = item.start + length;
-        }
-      });
     },
     // 判断光标是否在tag中，传入光标位置pos，返回{flag,tag}
     isCursorInTags(pos = 0) {
@@ -232,36 +216,26 @@ export default {
       this.valid = true;
       this.errorInfo = null;
     },
+    // 同步text
     syncText() {
       this.text = this.value.text || "";
       this.tags = this.value.tags || [];
       this.valid = this.value.valid || true;
       this.errorInfo = this.value.errorInfo || null;
-      let SA = {};
-      var fdi = (tag, index = 0, cb) => {
+      this.syncTag();
+    },
+    // 同步tag
+    syncTag() {
+      let copyText = this.text;
+      this.tags.forEach(tag => {
         let tagName = this.braces
           ? "{{" + tag.name + "}}"
           : "{" + tag.name + "}";
-        let c_index = this.text.indexOf(tagName, index);
-        if (SA[tag.id] && SA[tag.id].indexOf(c_index) > -1) {
-          fdi(tag, c_index + 1, cb);
-        } else {
-          cb(c_index);
-          if (c_index !== -1) {
-            if (SA[tag.id]) {
-              SA[tag.id].push(c_index);
-            } else {
-              SA[tag.id] = [c_index];
-            }
-          }
-        }
-      };
-      this.tags.forEach(tag => {
-        fdi(tag, 0, c_index => {
-          tag.start = c_index;
-        });
+        let index = copyText.indexOf(tagName);
+        tag.start = index;
+        copyText = copyText.replace(tagName, "*".repeat(tagName.length));
       });
-      this.tags = this.tags.filter(tag => tag.start !== -1);
+      this.tags.sort((a, b) => a.start - b.start);
       this.tagSelectionArr = this.tags.map(tag => {
         return [tag.start, tag.start + tag.name.length + (this.braces ? 4 : 2)];
       });
@@ -269,37 +243,27 @@ export default {
   },
   watch: {
     text(newVal, oldVal) {
-      // 关于标签的操作，放置二次触发wtach
-      if (!this.textChangeByTag) {
+      let config;
+      if (this.textChangeByInput && newVal.length < oldVal.length) {
         let newCursorPos = this.getCursortPosition();
-        let diffValLength = newVal.length - oldVal.length;
-        let oldCursorPos = newCursorPos - diffValLength;
-        this.setCursorAfterTags(oldCursorPos, diffValLength);
-        let config = this.isCursorInTags(newCursorPos);
-        if (config.flag) {
-          this.tagSelectionArr = this.tagSelectionArr.filter(tag => {
-            return tag[0] !== config.tag[0];
-          });
-          this.tags = this.tags.filter(tag => {
-            return tag.start !== config.tag[0];
-          });
-          this.setCursorAfterTags(
-            config.tag[0],
-            config.tag[0] - config.tag[1] + 1
-          );
-          this.text =
-            this.text.substr(0, config.tag[0]) +
-            this.text.substr(config.tag[1] - 1);
-          this.textChangeByTag = true;
-          this.$nextTick(() => {
-            this.setCursorPosition(config.tag[0]);
-          });
-        }
-      } else {
-        this.textChangeByTag = false;
+        config = this.isCursorInTags(newCursorPos);
+        this.textChangeByInput = false;
       }
-
-      this.tags.sort((a, b) => a.start - b.start);
+      if (config && config.flag) {
+        // 删除标签的情况
+        this.tags = this.tags.filter(tag => {
+          return tag.start !== config.tag[0];
+        });
+        this.text =
+          this.text.substr(0, config.tag[0]) +
+          this.text.substr(config.tag[1] - 1);
+        // 设置光标位置
+        this.$nextTick(() => {
+          this.setCursorPosition(config.tag[0]);
+        });
+        return;
+      }
+      this.syncTag();
       this.validate();
       this.$emit("input", {
         text: this.text,
