@@ -12,6 +12,27 @@ export default new Router({
       path: "/",
       name: "home",
       component: Home
+    },
+    {
+      path: "/form",
+      name: "form",
+      component(resolve) {
+        return require(["./views/form.vue"], resolve);
+      }
+    },
+    {
+      path: "/bus",
+      name: "bus",
+      component(resolve) {
+        return require(["./views/bus.vue"], resolve);
+      }
+    },
+    {
+      path: "/service",
+      name: "service",
+      component(resolve) {
+        return require(["./views/service.vue"], resolve);
+      }
     }
   ]
 });

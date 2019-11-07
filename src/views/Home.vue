@@ -1,5 +1,8 @@
 <template>
   <div class="home">
+    <router-link to="/form">
+      <el-button>新建（屁屁妮点这里）</el-button>
+    </router-link>
     <h3>单括号</h3>
     <div><el-button size="small" @click="setTagInput1">设置值</el-button></div>
     <tag-input v-model="tagInputValue1" :tagconfig="tagconfig"> </tag-input>
