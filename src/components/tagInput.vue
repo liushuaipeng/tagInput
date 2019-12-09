@@ -83,7 +83,7 @@ export default {
     },
     addTag(tag) {
       tag = Object.assign({}, tag);
-      let selectionStart = this.getCursortPosition() || this.text.length;
+      let selectionStart = this.getCursortPosition();
       let tagName =
         (this.braces ? "{{" : "{") + tag.name + (this.braces ? "}}" : "}");
       let selectionEnd = selectionStart + tagName.length;
