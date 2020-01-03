@@ -23,8 +23,6 @@
 </template>
 
 <script>
-// 2019-09-23
-// 增加braces配置单双花括号，增加prop验证规则，支持min，max，maxTags
 export default {
   props: {
     value: {
@@ -36,9 +34,13 @@ export default {
     tagconfig: {
       type: Array
     },
-    braces: {
-      type: Boolean,
-      default: false
+    leftSymbol: {
+      type: String,
+      default: "{"
+    },
+    rightSymbol: {
+      type: String,
+      default: "}"
     },
     prop: {
       type: Object,
@@ -84,8 +86,7 @@ export default {
     addTag(tag) {
       tag = Object.assign({}, tag);
       let selectionStart = this.getCursortPosition();
-      let tagName =
-        (this.braces ? "{{" : "{") + tag.name + (this.braces ? "}}" : "}");
+      let tagName = this.leftSymbol + tag.name + this.rightSymbol;
       let selectionEnd = selectionStart + tagName.length;
       tag.start = selectionStart;
       this.tags.push(tag);
@@ -190,54 +191,62 @@ export default {
     validate() {
       if (this.prop.maxTags && this.tags.length > this.prop.maxTags) {
         this.valid = false;
-        this.errorInfo = "最多可以添加" + this.prop.maxTags + "个标签";
+        this.errorMsg = "最多可以添加" + this.prop.maxTags + "个标签";
+        this.errorKey = "maxTags";
         return;
       }
       if (this.prop.min && this.text.length < this.prop.min) {
         this.valid = false;
-        this.errorInfo = "最少" + this.prop.min + "个字符，请正确输入";
+        this.errorMsg = "最少" + this.prop.min + "个字符，请正确输入";
+        this.errorKey = "min";
         return;
       }
       if (this.prop.max && this.text.length > this.prop.max) {
         this.valid = false;
-        this.errorInfo = "最多" + this.prop.max + "个字符，请正确输入";
+        this.errorMsg = "最多" + this.prop.max + "个字符，请正确输入";
+        this.errorKey = "max";
         return;
       }
       if (
-        this.text.split(this.braces ? "{{" : "{").length - 1 !==
-          this.tags.length ||
-        this.text.split(this.braces ? "}}" : "}").length - 1 !==
-          this.tags.length
+        this.text.split(this.leftSymbol).length - 1 !== this.tags.length ||
+        this.text.split(this.rightSymbol).length - 1 !== this.tags.length
       ) {
         this.valid = false;
-        this.errorInfo = "请勿输入花括号等特殊字符";
+        this.errorMsg = `请勿输入 “${this.leftSymbol}”“${this.rightSymbol}” 等特殊字符`;
+        this.errorKey = "symbolError";
         return;
       }
       this.valid = true;
-      this.errorInfo = null;
+      this.errorMsg = null;
+      this.errorKey = null;
     },
     // 同步text
     syncText() {
       this.text = this.value.text || "";
       this.tags = this.value.tags || [];
       this.valid = this.value.valid || true;
-      this.errorInfo = this.value.errorInfo || null;
+      this.errorMsg = this.value.errorMsg || null;
+      this.errorKey = this.value.errorKey || null;
       this.syncTag();
     },
     // 同步tag
     syncTag() {
       let copyText = this.text;
       this.tags.forEach(tag => {
-        let tagName = this.braces
-          ? "{{" + tag.name + "}}"
-          : "{" + tag.name + "}";
+        let tagName = this.leftSymbol + tag.name + this.rightSymbol;
         let index = copyText.indexOf(tagName);
         tag.start = index;
         copyText = copyText.replace(tagName, "*".repeat(tagName.length));
       });
       this.tags.sort((a, b) => a.start - b.start);
       this.tagSelectionArr = this.tags.map(tag => {
-        return [tag.start, tag.start + tag.name.length + (this.braces ? 4 : 2)];
+        return [
+          tag.start,
+          tag.start +
+            tag.name.length +
+            this.leftSymbol.length +
+            this.rightSymbol.length
+        ];
       });
     }
   },
@@ -269,7 +278,8 @@ export default {
         text: this.text,
         tags: this.tags,
         valid: this.valid,
-        errorInfo: this.errorInfo
+        errorMsg: this.errorMsg,
+        errorKey: this.errorKey
       });
     },
     "value.text"(val) {
