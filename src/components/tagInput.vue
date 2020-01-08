@@ -2,6 +2,7 @@
   <div class="tagInput">
     <input
       ref="tagInput"
+      class="tagInputInner"
       type="text"
       v-model="text"
       @click="handleClick"
@@ -9,15 +10,15 @@
       @select="handleSelect"
       @keydown="handleKeydown"
     />
-    <div>
-      <el-tag
+    <div class="tagInputTagsWrap">
+      <div
+        class="tagInputTag"
         v-for="item in tagconfig"
         :key="item.id"
         @click="addTag(item)"
-        size="mini"
       >
         +{{ item.name }}
-      </el-tag>
+      </div>
     </div>
   </div>
 </template>
@@ -295,20 +296,40 @@ export default {
 <style lang="less" scoped>
 .tagInput {
   display: inline-block;
-  input {
+  width: 100%;
+  .tagInputInner {
+    width: 100%;
     min-width: 300px;
+    box-sizing: border-box;
     background: transparent;
     border: 1px solid #dadada;
     padding: 0 15px;
     outline: none;
-    height: 38px;
-    line-height: 38px;
+    height: 32px;
+    line-height: 32px;
     border-radius: 5px;
     font-size: 16px;
   }
-  .el-tag {
-    margin-right: 10px;
-    cursor: pointer;
+  .tagInputTagsWrap {
+    margin-top: 5px;
+    font-size: 0;
+    .tagInputTag {
+      background-color: #ecf5ff;
+      display: inline-block;
+      height: 24px;
+      padding: 0 8px;
+      line-height: 22px;
+      font-size: 12px;
+      color: #409eff;
+      border: 1px solid #d9ecff;
+      border-radius: 4px;
+      box-sizing: border-box;
+      white-space: nowrap;
+      cursor: pointer;
+      &+.tagInputTag {
+        margin-left: 10px;
+      }
+    }
   }
 }
 </style>
