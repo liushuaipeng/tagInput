@@ -1,11 +1,13 @@
 {
-  "name": "client",
+  "name": "taginput",
   "version": "0.1.0",
   "private": true,
+  "main": "./dist/taginput.common.js",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "build-bundle": "vue-cli-service build --target lib --name taginput ./src/index.js"
   },
   "dependencies": {
     "core-js": "^2.6.5",

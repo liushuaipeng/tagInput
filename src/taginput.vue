@@ -326,7 +326,7 @@ export default {
       box-sizing: border-box;
       white-space: nowrap;
       cursor: pointer;
-      &+.tagInputTag {
+      & + .tagInputTag {
         margin-left: 10px;
       }
     }
