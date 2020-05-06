@@ -1,6 +1,6 @@
 import Vue from "vue";
-import taginput from "./taginput.vue";
+import tagInput from "./tag-input.vue";
 
-Vue.component("taginput", taginput);
-export { default as taginput } from "./taginput";
-export default taginput;
+Vue.component("tag-input", tagInput);
+export { default as tagInput } from "./tag-input";
+export default tagInput;

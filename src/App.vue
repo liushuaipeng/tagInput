@@ -5,37 +5,37 @@
       <div>
         <el-button size="small" @click="setTagInput1">设置值</el-button>
       </div>
-      <taginput v-model="tagInputValue1" :tagconfig="tagconfig"> </taginput>
+      <tag-input v-model="tagInputValue1" :tagconfig="tagconfig"> </tag-input>
       <div>{{ tagInputValue1 }}</div>
       <el-divider></el-divider>
       <h3>双括号</h3>
-      <taginput
+      <tag-input
         v-model="tagInputValue2"
         :tagconfig="tagconfig"
         :left-symbol="'{{'"
         :right-symbol="'}}'"
       >
-      </taginput>
+      </tag-input>
       <div>{{ tagInputValue2 }}</div>
       <el-divider></el-divider>
       <h3>双括号带校验配置 支持min，max，maxTags</h3>
-      <taginput
+      <tag-input
         v-model="tagInputValue3"
         :tagconfig="tagconfig"
         :left-symbol="'{{'"
         :right-symbol="'}}'"
         :prop="{ min: 6, max: 20, maxTags: 2 }"
       >
-      </taginput>
+      </tag-input>
       <div>{{ tagInputValue3 }}</div>
     </div>
   </div>
 </template>
 <script>
-import taginput from "./taginput.vue";
+import tagInput from "./tag-input.vue";
 export default {
   components: {
-    taginput
+    tagInput
   },
   data() {
     return {
