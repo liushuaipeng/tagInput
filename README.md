@@ -5,7 +5,7 @@
 ### example
 
 ![图片展示](https://qcloudtest-1255506820.cos.ap-guangzhou.myqcloud.com/github/taginput/example.gif)
-Demo：[https://liushuaipeng.com/demo/tag-input-vue](https://liushuaipeng.com/demo/tag-input-vue)
+Demo：[https://liushuaipeng.com/demo/tag-input-vue](https://liushuaipeng.cn/demo/tag-input-vue)
 
 ### install tag-input-vue
 
